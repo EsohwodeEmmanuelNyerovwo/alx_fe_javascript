@@ -19,13 +19,21 @@ function addQuote() {
 }
 function showRandomQuote() {
     quoteArr.forEach(quote => {
-        const p1 = document.createElement('p');
-        const p2 = document.createElement('p');
-        p1.textContent = quote.text;
-        p2.textContent = quote.catogory;
-        quoteDisplay.append(p1, p2);
+        quoteDisplay.innerHTML += `
+            ${quote.text} --- ${quote.category};
+        `
     })
 }
+// function showRandomQuote() {
+//     quoteArr.forEach(quote => {
+
+//         const p1 = document.createElement('p');
+//         const p2 = document.createElement('p');
+//         p1.textContent = quote.text;
+//         p2.textContent = quote.catogory;
+//         quoteDisplay.append(p1, p2);
+//     })
+// }
 function createAddQuoteForm() {
     const txtValue = newQuoteText.value;
     const catogoryValue = newQuoteCategory.value;
