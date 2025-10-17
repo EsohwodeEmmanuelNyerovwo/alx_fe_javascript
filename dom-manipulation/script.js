@@ -1,0 +1,6 @@
+function showRandomQuote() {
+
+}
+function createAddQuoteForm() {
+
+}
