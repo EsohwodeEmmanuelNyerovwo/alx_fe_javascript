@@ -4,12 +4,12 @@ const quoteDisplay = document.getElementById('quoteDisplay');
 const newQuote = document.getElementById('newQuote');
 const quoteArr = [
     {
-        text: 'I think, therefore I am',
-        catogory: 'Motivation'
+        text: "I think, therefore I am",
+        category: "Motivation",
     },
     {
-        text: 'There are no regrets in life. Just lessons',
-        catogory: 'Reflection'
+        text: "There are no regrets in life. Just lessons",
+        category: "Reflection",
     }
 ]
 
