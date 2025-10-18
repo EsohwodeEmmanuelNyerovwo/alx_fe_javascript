@@ -32,6 +32,30 @@ function showRandomQuote() {
     //     `
     // })
 }
+const quotes = [
+    { text: "Be yourself; everyone else is already taken.", author: "Oscar Wilde" },
+    { text: "The journey of a thousand miles begins with one step.", author: "Lao Tzu" }
+];
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+    // Step 1: Convert array to JSON
+    const jsonData = JSON.stringify(quotes, null, 2);
+
+    // Step 2: Create a Blob (represents the data as a file)
+    const blob = new Blob([jsonData], { type: 'application/json' });
+
+    // Step 3: Create a temporary download link
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'quotes.json'; // file name for download
+    document.body.appendChild(a);
+
+    // Step 4: Trigger download and clean up
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+});
 function importFromJsonFile(event) {
     const fileReader = new FileReader();
     fileReader.onload = function (event) {
