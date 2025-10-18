@@ -2,6 +2,9 @@ const newQuoteText = document.getElementById('newQuoteText');
 const newQuoteCategory = document.getElementById('newQuoteCategory');
 const quoteDisplay = document.getElementById('quoteDisplay');
 const newQuote = document.getElementById('newQuote');
+const txt = document.getElementById('text');
+const category = document.getElementById('category');
+
 const quoteArr = [
     {
         text: "I think, therefore I am",
@@ -12,17 +15,20 @@ const quoteArr = [
         category: "Reflection",
     }
 ]
-
-// newQuote.addEventListener('click', createAddQuoteForm);
+let index = 0;
+newQuote.addEventListener('click', showRandomQuote);
 function addQuote() {
     createAddQuoteForm();
 }
 function showRandomQuote() {
-    quoteArr.forEach(quote => {
-        quoteDisplay.innerHTML += `
-            ${quote.text} --- ${quote.category};
-        `
-    })
+    index = Math.floor(Math.random() * quoteArr.length);
+    const rnd = quoteArr[index];
+    quoteDisplay.innerHTML = `${rnd.text} --- ${rnd.category}`;
+    // quoteArr.forEach(quote => {
+    //     quoteDisplay.innerHTML += `
+    //         ${quote.text} --- ${quote.category};
+    //     `
+    // })
 }
 // function showRandomQuote() {
 //     quoteArr.forEach(quote => {
@@ -41,7 +47,7 @@ function createAddQuoteForm() {
     if (txtValue !== '' || catogoryValue !== '') {
         quoteArr.push({
             text: txtValue,
-            catogory: catogoryValue
+            category: catogoryValue
         });
     }
     showRandomQuote();
