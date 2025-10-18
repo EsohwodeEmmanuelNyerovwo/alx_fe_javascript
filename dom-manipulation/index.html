@@ -22,6 +22,62 @@
     <select id="categoryFilter" onchange="filterQuotes()">
         <option value="all">All Categories</option>
     </select>
+
+    <div class="card">
+        <h1>Dynamic Quote Generator — Sync & Conflict Handling</h1>
+        <p class="muted">This demo periodically syncs local quotes with a simulated remote server. Conflicts (same quote
+            id changed locally and on server) are resolved with <strong>server-priority</strong> by default; you can
+            manually keep local changes when conflicts occur.</p>
+
+        <div style="margin:12px 0" class="server-mode">
+            <label>Server Mode:</label>
+            <select id="serverMode">
+                <option value="mock">Mock Server (in-browser)</option>
+                <option value="real">Real Server (placeholder)</option>
+            </select>
+
+            <label style="margin-left:8px">Poll interval (sec):</label>
+            <input id="pollInterval" type="number" value="8" style="width:72px" min="3" />
+            <button id="applySettings">Apply</button>
+            <div style="margin-left:auto" class="small">Last sync: <span id="lastSync">—</span></div>
+        </div>
+
+        <hr />
+
+        <div class="grid">
+            <div>
+                <label for="quoteText">Quote</label>
+                <textarea id="quoteText" placeholder="Write a quote..."></textarea>
+                <label for="quoteAuthor" style="margin-top:8px;display:block">Author</label>
+                <input id="quoteAuthor" type="text" placeholder="Author name" />
+
+                <label for="quoteCategory" style="margin-top:8px;display:block">Category</label>
+                <input id="quoteCategory" type="text" placeholder="e.g., Motivation" />
+
+                <div class="controls" style="margin-top:12px">
+                    <button id="addQuoteBtn">Add Quote</button>
+                    <button id="pushBtn">Push Local Changes</button>
+                    <button id="forcePullBtn">Force Pull (Fetch)</button>
+                    <button id="clearBtn" class="danger">Clear Local</button>
+                </div>
+
+                <div style="margin-top:12px;">
+                    <strong>Sync Notifications</strong>
+                    <div id="notifications" style="margin-top:8px"></div>
+                </div>
+            </div>
+
+            <div>
+                <strong>Quotes</strong>
+                <div id="quotesContainer" style="margin-top:8px;max-height:560px;overflow:auto;padding-right:6px"></div>
+
+                <div style="margin-top:10px">
+                    <strong>Conflicts</strong>
+                    <div id="conflictsContainer" style="margin-top:8px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="./script.js"></script>
 </body>
 
