@@ -98,3 +98,83 @@ function createAddQuoteForm() {
 
     showRandomQuote();
 }
+
+// Add this near your other constants
+const FILTER_KEY = 'dq_lastFilter';
+
+// Update your quote structure to include a category when adding a new quote
+function addQuote() {
+    const text = quoteText.value.trim();
+    const author = quoteAuthor.value.trim();
+    const category = prompt("Enter category for this quote (e.g., 'Motivation', 'Life', 'Humor')") || 'Uncategorized';
+
+    if (!text) {
+        alert('Please enter a quote.');
+        return;
+    }
+
+    const quoteObj = { id: Date.now(), text, author, category };
+    quotes.push(quoteObj);
+    saveQuotes();
+    populateCategories();  // update dropdown with new category
+    renderQuotes();
+    quoteText.value = '';
+    quoteAuthor.value = '';
+}
+
+function populateCategories() {
+    const filterSelect = document.getElementById('categoryFilter');
+    const categories = ['all', ...new Set(quotes.map(q => q.category || 'Uncategorized'))];
+
+    // Clear existing options
+    filterSelect.innerHTML = '';
+    categories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat;
+        option.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+        filterSelect.appendChild(option);
+    });
+
+    // Restore last filter from localStorage
+    const lastFilter = localStorage.getItem(FILTER_KEY) || 'all';
+    filterSelect.value = lastFilter;
+}
+
+function filterQuotes() {
+    const selectedCategory = document.getElementById('categoryFilter').value;
+    localStorage.setItem(FILTER_KEY, selectedCategory); // remember user choice
+    renderQuotes(selectedCategory);
+}
+function renderQuotes(filter = 'all') {
+    const container = document.getElementById('quotesContainer');
+    container.innerHTML = '';
+
+    let filteredQuotes = quotes;
+    if (filter !== 'all') {
+        filteredQuotes = quotes.filter(q => q.category === filter);
+    }
+
+    if (filteredQuotes.length === 0) {
+        container.innerHTML = '<div class="small muted">No quotes in this category.</div>';
+        return;
+    }
+
+    const ul = document.createElement('ul');
+    filteredQuotes.forEach(q => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+      <div><strong>${q.text}</strong><br><span class="meta">${q.author || 'Unknown'} — ${q.category}</span></div>
+      <button onclick="handleView(${q.id})">View</button>
+    `;
+        ul.appendChild(li);
+    });
+
+    container.appendChild(ul);
+}
+
+// Restore filter and render accordingly
+const lastFilter = localStorage.getItem(FILTER_KEY) || 'all';
+renderQuotes(lastFilter);
+document.getElementById('categoryFilter').value = lastFilter;
+
+populateCategories();
