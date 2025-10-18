@@ -562,59 +562,52 @@ async function resolveConflictAcceptServer(idx) {
     - If both exist and updatedAt differ -> conflict
   - For conflicts: by default, server wins (overwrite local) but we also record conflict and notify the user, allowing manual keep-local
 */
-async function syncWithServer() {
+async function syncQuotes() {
+    notify('Starting sync process...');
     try {
-        const serverData = await fetchQuotesFromServer();
-        // Basic normalization: ensure updatedAt exists
-        const normalizedServer = serverData.map(s => ({ ...s, updatedAt: s.updatedAt || new Date().toISOString() }));
+        // 1️⃣ Fetch local and server quotes
+        const localQuotes = JSON.parse(localStorage.getItem('quotes') || '[]');
+        const serverQuotes = await fetchQuotesFromServer();
 
-        // Detect additions from server
-        const localMap = new Map(quotes.map(q => [q.id, q]));
-        const serverMap = new Map(normalizedServer.map(s => [s.id, s]));
+        // 2️⃣ Compare and find missing or updated quotes
+        const mergedQuotes = [...localQuotes];
+        let conflicts = [];
 
-        // Items present on server but not local -> add to local
-        let addedFromServer = 0;
-        for (const s of normalizedServer) {
-            if (!localMap.has(s.id)) {
-                quotes.push(s);
-                addedFromServer++;
+        serverQuotes.forEach(serverQuote => {
+            const localIndex = mergedQuotes.findIndex(q => q.id === serverQuote.id);
+            if (localIndex === -1) {
+                // New server quote — add it
+                mergedQuotes.push(serverQuote);
+            } else if (new Date(serverQuote.updatedAt) > new Date(mergedQuotes[localIndex].updatedAt)) {
+                // Conflict — server takes precedence
+                conflicts.push({
+                    type: 'conflict',
+                    local: mergedQuotes[localIndex],
+                    server: serverQuote,
+                });
+                mergedQuotes[localIndex] = serverQuote;
+            }
+        });
+
+        // 3️⃣ Push new local quotes to the server (mock or real)
+        for (const localQuote of localQuotes) {
+            if (!serverQuotes.some(sq => sq.id === localQuote.id)) {
+                await pushToServer(localQuote);
             }
         }
 
-        // Items present locally but not on server -> push local to server
-        let pushedToServer = 0;
-        for (const l of quotes) {
-            if (!serverMap.has(l.id)) {
-                // push local item to server
-                await pushToServer(l);
-                pushedToServer++;
-            }
+        // 4️⃣ Update local storage
+        localStorage.setItem('quotes', JSON.stringify(mergedQuotes));
+
+        // 5️⃣ Notify user
+        if (conflicts.length > 0) {
+            notify(`Sync complete with ${conflicts.length} conflict(s) resolved (server data used).`);
+        } else {
+            notify('Sync complete — no conflicts detected.');
         }
-
-        // Conflicts: both exist but updatedAt differ
-        const detected = findConflicts(quotes, normalizedServer);
-        conflicts = detected; // store for UI
-        if (detected.length > 0) {
-            // By default apply server-wins:
-            for (const c of detected) {
-                // find local index & replace local with server
-                const idx = quotes.findIndex(x => x.id === c.local.id);
-                if (idx >= 0) quotes[idx] = c.server;
-            }
-            notify(`Sync: ${detected.length} conflict(s) resolved (server-wins). You may override in the Conflicts panel.`);
-        }
-
-        saveQuotesLocal();
-        renderQuotes();
-        renderConflicts();
-
-        const now = new Date();
-        localStorage.setItem(LAST_SYNC_KEY, now.toISOString());
-        lastSyncEl.textContent = now.toLocaleTimeString();
-        notify(`Sync complete. +${addedFromServer} added from server, ${pushedToServer} pushed to server.`);
-    } catch (err) {
-        console.error('Sync failed', err);
-        notify('Sync failed: ' + (err.message || err));
+    } catch (error) {
+        console.error('Sync error:', error);
+        notify('Sync failed. Please try again later.');
     }
 }
 
