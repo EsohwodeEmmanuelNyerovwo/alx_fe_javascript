@@ -309,12 +309,36 @@ async function fetchQuotesFromServer() {
         }
     }
 }
-async function pushToServer(item) {
+async function pushToServer(quote) {
     if (serverModeSelect.value === 'mock') {
-        return await mockServerUpdateItem(item);
+        // Simulate a network delay
+        await new Promise(res => setTimeout(res, 200));
+        // Mock storage simulation
+        let serverData = JSON.parse(localStorage.getItem('mockServer') || '[]');
+        serverData.push(quote);
+        localStorage.setItem('mockServer', JSON.stringify(serverData));
+        return { status: 200, message: 'Mock upload successful' };
     } else {
-        // Placeholder for real server push
-        return await mockServerUpdateItem(item);
+        try {
+            const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+                method: 'POST', // ✅ Explicit HTTP method
+                headers: {
+                    'Content-Type': 'application/json; charset=UTF-8', // ✅ Proper header
+                },
+                body: JSON.stringify(quote), // ✅ Send quote data as JSON
+            });
+
+            if (!response.ok) {
+                throw new Error(`Server responded with ${response.status}`);
+            }
+
+            const data = await response.json();
+            return { status: response.status, message: 'Posted successfully', data };
+        } catch (error) {
+            console.error('Error posting to server:', error);
+            notify('Failed to post quote to server.');
+            throw error;
+        }
     }
 }
 
