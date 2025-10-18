@@ -14,8 +14,10 @@
         <input type="text" id="newQuoteCategory" placeholder="Enter quote category">
         <button onclick="addQuote()">Add Quote</button>
     </div>
-    <div id="quoteDisplay"></div>
+    <div id="quoteDisplay">
+    </div>
     <button id="newQuote">Show New Quote</button>
+    <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)">
     <script src="./script.js"></script>
 </body>
 

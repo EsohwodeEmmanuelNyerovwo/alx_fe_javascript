@@ -3,7 +3,7 @@ const newQuoteCategory = document.getElementById('newQuoteCategory');
 const quoteDisplay = document.getElementById('quoteDisplay');
 const newQuote = document.getElementById('newQuote');
 
-const quoteArr = [
+let quoteArr = [
     {
         text: "I think, therefore I am",
         category: "Motivation",
@@ -22,6 +22,8 @@ function addQuote() {
 }
 function showRandomQuote() {
     index = Math.floor(Math.random() * quoteArr.length);
+    let storedItem = JSON.parse(localStorage.getItem('quoteAlx'))
+    quoteArr = storedItem;
     const rnd = quoteArr[index];
     quoteDisplay.innerHTML = `${rnd.text} --- ${rnd.category}`;
     // quoteArr.forEach(quote => {
@@ -29,6 +31,16 @@ function showRandomQuote() {
     //         ${quote.text} --- ${quote.category};
     //     `
     // })
+}
+function importFromJsonFile(event) {
+    const fileReader = new FileReader();
+    fileReader.onload = function (event) {
+        const importedQuotes = JSON.parse(event.target.result);
+        quotes.push(...importedQuotes);
+        saveQuotes();
+        alert('Quotes imported successfully!');
+    };
+    fileReader.readAsText(event.target.files[0]);
 }
 // function showRandomQuote() {
 //     quoteArr.forEach(quote => {
@@ -49,6 +61,7 @@ function createAddQuoteForm() {
             text: txtValue,
             category: catogoryValue
         });
+        localStorage.setItem('quoteAlx', JSON.stringify(quoteArr));
     }
     const p1 = document.createElement('p');
     const p2 = document.createElement('p');
