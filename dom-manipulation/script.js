@@ -419,13 +419,12 @@ function renderConflicts() {
     });
 }
 
-function notify(msg) {
-    const div = document.createElement('div');
-    div.className = 'notif';
-    div.textContent = `${new Date().toLocaleTimeString()}: ${msg}`;
-    notifications.prepend(div);
-    // keep only last 8 notifications
-    Array.from(notifications.children).slice(8).forEach(n => n.remove());
+function notify(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 4000);
 }
 
 // ---------- Edit flow ----------
@@ -565,21 +564,17 @@ async function resolveConflictAcceptServer(idx) {
 async function syncQuotes() {
     notify('Starting sync process...');
     try {
-        // 1️⃣ Fetch local and server quotes
         const localQuotes = JSON.parse(localStorage.getItem('quotes') || '[]');
         const serverQuotes = await fetchQuotesFromServer();
 
-        // 2️⃣ Compare and find missing or updated quotes
         const mergedQuotes = [...localQuotes];
         let conflicts = [];
 
         serverQuotes.forEach(serverQuote => {
             const localIndex = mergedQuotes.findIndex(q => q.id === serverQuote.id);
             if (localIndex === -1) {
-                // New server quote — add it
                 mergedQuotes.push(serverQuote);
             } else if (new Date(serverQuote.updatedAt) > new Date(mergedQuotes[localIndex].updatedAt)) {
-                // Conflict — server takes precedence
                 conflicts.push({
                     type: 'conflict',
                     local: mergedQuotes[localIndex],
@@ -589,22 +584,28 @@ async function syncQuotes() {
             }
         });
 
-        // 3️⃣ Push new local quotes to the server (mock or real)
+        // Push new local quotes to the server
         for (const localQuote of localQuotes) {
             if (!serverQuotes.some(sq => sq.id === localQuote.id)) {
                 await pushToServer(localQuote);
             }
         }
 
-        // 4️⃣ Update local storage
         localStorage.setItem('quotes', JSON.stringify(mergedQuotes));
 
-        // 5️⃣ Notify user
+        // ✅ Notify user of successful sync
         if (conflicts.length > 0) {
-            notify(`Sync complete with ${conflicts.length} conflict(s) resolved (server data used).`);
+            notify('Quotes synced with server! Some conflicts were resolved.');
         } else {
-            notify('Sync complete — no conflicts detected.');
+            notify('Quotes synced with server!');
         }
+
+        // Optional: update UI element with last sync time
+        const syncStatus = document.getElementById('syncStatus');
+        if (syncStatus) {
+            syncStatus.textContent = `Quotes synced with server! Last sync: ${new Date().toLocaleTimeString()}`;
+        }
+
     } catch (error) {
         console.error('Sync error:', error);
         notify('Sync failed. Please try again later.');
