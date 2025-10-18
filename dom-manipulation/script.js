@@ -274,14 +274,39 @@ function mockServerUpdateItem(item) {
     pushToServer(changes) -> POST/PUT
   For this demo we default to mockServer* functions above.
 */
-async function fetchServerAll() {
+// async function fetchServerAll() {
+//     if (serverModeSelect.value === 'mock') {
+//         return await mockServerFetchAll();
+//     } else {
+//         // Placeholder: when integrating a real API, replace below with fetch() calls:
+//         // return fetch('/api/quotes').then(r => r.json())
+//         // For safety in this demo, just fall back to mock.
+//         return await mockServerFetchAll();
+//     }
+// }
+// Fetch all quotes from the server (mock or real)
+async function fetchQuotesFromServer() {
     if (serverModeSelect.value === 'mock') {
+        // Simulated server fetch (uses localStorage as backend)
         return await mockServerFetchAll();
     } else {
-        // Placeholder: when integrating a real API, replace below with fetch() calls:
-        // return fetch('/api/quotes').then(r => r.json())
-        // For safety in this demo, just fall back to mock.
-        return await mockServerFetchAll();
+        // Placeholder for a real API call (replace with your actual endpoint)
+        try {
+            const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+            const data = await response.json();
+            // Transform data to fit your quote format if needed
+            return data.map(post => ({
+                id: post.id,
+                text: post.title,
+                author: 'ServerUser',
+                category: 'Imported',
+                updatedAt: new Date().toISOString(),
+            }));
+        } catch (err) {
+            console.error('Error fetching from real server:', err);
+            notify('Failed to fetch from real server, using mock fallback.');
+            return await mockServerFetchAll();
+        }
     }
 }
 async function pushToServer(item) {
@@ -515,7 +540,7 @@ async function resolveConflictAcceptServer(idx) {
 */
 async function syncWithServer() {
     try {
-        const serverData = await fetchServerAll();
+        const serverData = await fetchQuotesFromServer();
         // Basic normalization: ensure updatedAt exists
         const normalizedServer = serverData.map(s => ({ ...s, updatedAt: s.updatedAt || new Date().toISOString() }));
 
