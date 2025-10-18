@@ -2,8 +2,6 @@ const newQuoteText = document.getElementById('newQuoteText');
 const newQuoteCategory = document.getElementById('newQuoteCategory');
 const quoteDisplay = document.getElementById('quoteDisplay');
 const newQuote = document.getElementById('newQuote');
-const txt = document.getElementById('text');
-const category = document.getElementById('category');
 
 const quoteArr = [
     {
@@ -16,7 +14,9 @@ const quoteArr = [
     }
 ]
 let index = 0;
+
 newQuote.addEventListener('click', showRandomQuote);
+
 function addQuote() {
     createAddQuoteForm();
 }
@@ -50,5 +50,14 @@ function createAddQuoteForm() {
             category: catogoryValue
         });
     }
+    const p1 = document.createElement('p');
+    const p2 = document.createElement('p');
+
+    p1.textContent = txtValue;
+    p2.textContent = catogoryValue;
+
+    quoteDisplay.appendChild(p1);
+    quoteDisplay.appendChild(p2);
+
     showRandomQuote();
 }
